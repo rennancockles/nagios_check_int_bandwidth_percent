@@ -6,7 +6,7 @@ Script to check the interface bandwidth usage in percents
 
 &nbsp;
 
-### Usage 
+## Usage 
 
 check_int_bandwidth_percent HOSTADDR IF_NAME COMMUNITY DIRECTION LINK_SPEED
 
@@ -26,7 +26,7 @@ LINK_SPEED = Link speed in Mbps: 10Gbps = 10000
 
 &nbsp;
 
-### Using with nagios
+## Using with nagios
 
 To use with nagios, copy the script to /usr/lib64/nagios/plugins/.
 
