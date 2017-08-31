@@ -1,0 +1,101 @@
+#!/bin/bash
+
+# Author: Rennan Cockles
+# Date: 29/08/2017
+
+# Script to check the interface bandwidth usage in percents
+#
+# Usage: check_int_bandwidth_percent HOSTADDR IF_NAME COMMUNITY DIRECTION LINK_SPEED
+#
+# HOSTADDR = Host IP address
+# IF_NAME = Interface name
+# COMMUNITY = SNMP Community
+# DIRECTION = Traffic direction - IN ou OUT
+# LINK_SPEED = Link speed in Mbps: 10Gbps = 10000
+
+function usage {
+  echo 'Usage: check_int_bandwidth_percent HOSTADDR IF_NAME COMMUNITY DIRECTION LINK_SPEED'
+}
+
+function err {
+  [[ -n $1 ]] && echo $1
+  usage
+  exit 3
+}
+
+function get_traffic_delta {
+  attempts=1
+
+  while [[ $attempts -le 3 ]]; do
+    # Faz a primeira leitura, aguarda o tempo da variavel time e faz a segunda leitura
+    t1=`snmpget -v2c -c $COMMUNITY $HOSTADDR $DIRECTION.$INTERFACE | awk {'print $4'}`
+    sleep $TIME_DELTA
+    t2=`snmpget -v2c -c $COMMUNITY $HOSTADDR $DIRECTION.$INTERFACE | awk {'print $4'}`
+
+    delta=`expr $t2 - $t1`
+
+    [ $delta -gt 0 ] && break;
+
+    let attempts++
+  done
+
+  echo $delta
+}
+
+function check_result {
+  value=`echo "scale=2; $1 / 100" | bc`;
+
+  if [ $1 -lt $WARNING ]; then
+    echo OK - $value%
+    exit 0
+  elif [ $1 -ge $WARNING ] && [ $1 -lt $CRITICAL ]; then
+    echo Attention - $value%
+    exit 1
+  else
+    echo Critical - $value%
+    exit 2
+  fi
+}
+
+
+if [ $# -lt 6 ]; then
+  err
+fi
+
+
+HOSTADDR=$1
+IF_NAME=$2
+COMMUNITY=$3
+DIRECTION=$4
+LINK_SPEED=$5
+
+WARNING=8000 # 80%
+CRITICAL=9000 # 90%
+
+IN_OCT='1.3.6.1.2.1.31.1.1.1.6';
+OUT_OCT='1.3.6.1.2.1.31.1.1.1.10';
+
+# Tempo entre a primeira leitura e a segunda leitura
+TIME_DELTA=30;
+
+# Busca no equipamento o numero da Interface desejada
+INTERFACE=`snmpwalk -v2c -c $COMMUNITY $HOSTADDR 1.3.6.1.2.1.2.2.1.2 | grep -m 1 $IF_NAME | awk {'print $1'} | awk -F"." {'print $NF'}`;
+
+if [ `echo $DIRECTION | tr '[:lower:]' '[:upper:]'` = 'IN' ]; then
+  DIRECTION=$IN_OCT
+elif [ `echo $DIRECTION | tr '[:lower:]' '[:upper:]'` = 'OUT' ]; then
+  DIRECTION=$OUT_OCT
+else
+  err 'DIRECTION value is not right'
+fi
+
+
+TRAFFIC_DELTA=`get_traffic_delta`
+[ $TRAFFIC_DELTA -lt 0 ] && err 'Traffic reading error'
+
+## 'kilo' is 1024
+#result=`echo "( $TRAFFIC_DELTA * 8 * 10000 ) / ( $TIME_DELTA * $LINK_SPEED * 1048576 )" | bc`;
+## 'kilo' is 1000
+result=`echo "( $TRAFFIC_DELTA * 8 * 10000 ) / ( $TIME_DELTA * $LINK_SPEED * 1000000 )" | bc`;
+
+check_result $result
