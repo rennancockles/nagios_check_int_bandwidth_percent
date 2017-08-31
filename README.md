@@ -1,15 +1,32 @@
 # nagios_check_int_bandwidth_percent
+
 Script to check the interface bandwidth usage in percents
 
-## Usage: check_int_bandwidth_percent HOSTADDR IF_NAME COMMUNITY DIRECTION LINK_SPEED
+&nbsp;
+
+&nbsp;
+
+### Usage 
+
+check_int_bandwidth_percent HOSTADDR IF_NAME COMMUNITY DIRECTION LINK_SPEED
+
+&nbsp;
 
 HOSTADDR = Host IP address
+
 IF_NAME = Interface name
+
 COMMUNITY = SNMP Community
+
 DIRECTION = Traffic direction - IN ou OUT
+
 LINK_SPEED = Link speed in Mbps: 10Gbps = 10000
 
-## Using with nagios
+&nbsp;
+
+&nbsp;
+
+### Using with nagios
 
 To use with nagios, copy the script to /usr/lib64/nagios/plugins/.
 
