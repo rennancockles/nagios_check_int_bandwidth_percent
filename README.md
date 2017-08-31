@@ -6,7 +6,7 @@ Script to check the interface bandwidth usage in percents
 
 ## Usage 
 
-check_int_bandwidth_percent HOSTADDR IF_NAME COMMUNITY DIRECTION LINK_SPEED
+Usage: check_int_bandwidth_percent HOSTADDR IF_NAME COMMUNITY DIRECTION LINK_SPEED
 
 &nbsp;
 
@@ -16,7 +16,7 @@ IF_NAME = Interface name
 
 COMMUNITY = SNMP Community
 
-DIRECTION = Traffic direction - IN ou OUT
+DIRECTION = Traffic direction - IN or OUT
 
 LINK_SPEED = Link speed in Mbps: 10Gbps = 10000
 
